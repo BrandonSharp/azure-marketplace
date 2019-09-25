@@ -1309,33 +1309,33 @@ fi
 
 format_data_disks
 
-# log "[apt-get] updating apt-get"
-# (apt-get -y update || (sleep 15; apt-get -y update)) > /dev/null
-# log "[apt-get] updated apt-get"
+log "[apt-get] updating apt-get"
+(apt-get -y update || (sleep 15; apt-get -y update)) > /dev/null
+log "[apt-get] updated apt-get"
 
-# install_ntp
+install_ntp
 
-# install_java
+install_java
 
 install_es
 
 setup_data_disk
 
-# if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
-#     install_xpack
-#     # in 6.x + we need to set up the bootstrap.password in the keystore to use when setting up users
-#     if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
-#         setup_bootstrap_password
-#     fi
-# fi
+if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
+    install_xpack
+    # in 6.x + we need to set up the bootstrap.password in the keystore to use when setting up users
+    if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
+        setup_bootstrap_password
+    fi
+fi
 
-# if [[ ! -z "${INSTALL_ADDITIONAL_PLUGINS// }" ]]; then
-#     install_additional_plugins
-# fi
+if [[ ! -z "${INSTALL_ADDITIONAL_PLUGINS// }" ]]; then
+    install_additional_plugins
+fi
 
-# if [ ${INSTALL_AZURECLOUD_PLUGIN} -ne 0 ]; then
-#     install_repository_azure_plugin
-# fi
+if [ ${INSTALL_AZURECLOUD_PLUGIN} -ne 0 ]; then
+    install_repository_azure_plugin
+fi
 
 
 configure_elasticsearch_yaml
@@ -1349,10 +1349,10 @@ port_forward
 start_systemd
 
 # patch roles and users through the REST API which is a tad trickier
-# if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
-#   wait_for_started
-#   apply_security_settings
-# fi
+if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
+  wait_for_started
+  apply_security_settings
+fi
 
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
 PRETTY=$(printf '%dh:%dm:%ds\n' $(($ELAPSED_TIME/3600)) $(($ELAPSED_TIME%3600/60)) $(($ELAPSED_TIME%60)))
