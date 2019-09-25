@@ -423,9 +423,10 @@ install_es()
 
     log "[install_es] installing Elasticsearch $ES_VERSION"
 
-    cp elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
+    sudo cp elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
+    sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
-    yum install -q -y elasticsearch
+    sudo yum install -q -y elasticsearch
 
 
     log "[install_es] installed Elasticsearch $ES_VERSION"
