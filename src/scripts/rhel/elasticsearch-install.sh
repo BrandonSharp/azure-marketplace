@@ -377,48 +377,57 @@ install_java()
 # Install Elasticsearch
 install_es()
 {
-    local OS_SUFFIX=""
-    if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
-      OS_SUFFIX="-amd64"
-    fi
-    local PACKAGE="elasticsearch-${ES_VERSION}${OS_SUFFIX}.deb"
+    # local OS_SUFFIX=""
+    # if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
+    #   OS_SUFFIX="-amd64"
+    # fi
+    # local PACKAGE="elasticsearch-${ES_VERSION}${OS_SUFFIX}.deb"
 
-    local ALGORITHM="512"
-    if dpkg --compare-versions "$ES_VERSION" "lt" "5.6.2"; then
-      ALGORITHM="1"
-    fi
+    # local ALGORITHM="512"
+    # if dpkg --compare-versions "$ES_VERSION" "lt" "5.6.2"; then
+    #   ALGORITHM="1"
+    # fi
 
-    local SHASUM="$PACKAGE.sha$ALGORITHM"
-    local DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/$PACKAGE?ultron=msft&gambit=azure"
-    local SHASUM_URL="https://artifacts.elastic.co/downloads/elasticsearch/$SHASUM?ultron=msft&gambit=azure"
+    # local SHASUM="$PACKAGE.sha$ALGORITHM"
+    # local DOWNLOAD_URL="https://artifacts.elastic.co/downloads/elasticsearch/$PACKAGE?ultron=msft&gambit=azure"
+    # local SHASUM_URL="https://artifacts.elastic.co/downloads/elasticsearch/$SHASUM?ultron=msft&gambit=azure"
+
+    # log "[install_es] installing Elasticsearch $ES_VERSION"
+    # wget --retry-connrefused --waitretry=1 -q "$SHASUM_URL" -O $SHASUM
+    # local EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_es] error downloading Elasticsearch $ES_VERSION sha$ALGORITHM checksum"
+    #     exit $EXIT_CODE
+    # fi
+    # log "[install_es] download location - $DOWNLOAD_URL"
+    # wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
+    # EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_es] error downloading Elasticsearch $ES_VERSION"
+    #     exit $EXIT_CODE
+    # fi
+    # log "[install_es] downloaded Elasticsearch $ES_VERSION"
+
+    # # earlier sha files do not contain the package name. add it
+    # grep -q "$PACKAGE" $SHASUM || sed -i "s/.*/&  $PACKAGE/" $SHASUM
+
+    # shasum -a $ALGORITHM -c $SHASUM
+    # EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_es] error validating checksum for Elasticsearch $ES_VERSION"
+    #     exit $EXIT_CODE
+    # fi
+
+    # dpkg -i $PACKAGE
+    # log "[install_es] installed Elasticsearch $ES_VERSION"
 
     log "[install_es] installing Elasticsearch $ES_VERSION"
-    wget --retry-connrefused --waitretry=1 -q "$SHASUM_URL" -O $SHASUM
-    local EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_es] error downloading Elasticsearch $ES_VERSION sha$ALGORITHM checksum"
-        exit $EXIT_CODE
-    fi
-    log "[install_es] download location - $DOWNLOAD_URL"
-    wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_es] error downloading Elasticsearch $ES_VERSION"
-        exit $EXIT_CODE
-    fi
-    log "[install_es] downloaded Elasticsearch $ES_VERSION"
 
-    # earlier sha files do not contain the package name. add it
-    grep -q "$PACKAGE" $SHASUM || sed -i "s/.*/&  $PACKAGE/" $SHASUM
+    copy elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
 
-    shasum -a $ALGORITHM -c $SHASUM
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_es] error validating checksum for Elasticsearch $ES_VERSION"
-        exit $EXIT_CODE
-    fi
+    yum install -q -y elasticsearch
 
-    dpkg -i $PACKAGE
+
     log "[install_es] installed Elasticsearch $ES_VERSION"
 }
 
@@ -1210,12 +1219,15 @@ configure_os_properties()
 
 install_apt_package()
 {
+  # local PACKAGE=$1
+  # if [ $(dpkg-query -W -f='${Status}' $PACKAGE 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+  #   log "[install_$PACKAGE] installing $PACKAGE"
+  #   (apt-get -yq install $PACKAGE || (sleep 15; apt-get -yq install $PACKAGE))
+  #   log "[install_$PACKAGE] installed $PACKAGE"
+  # fi
+
   local PACKAGE=$1
-  if [ $(dpkg-query -W -f='${Status}' $PACKAGE 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
-    log "[install_$PACKAGE] installing $PACKAGE"
-    (apt-get -yq install $PACKAGE || (sleep 15; apt-get -yq install $PACKAGE))
-    log "[install_$PACKAGE] installed $PACKAGE"
-  fi
+  yum install -q -y $PACKAGE
 }
 
 install_unzip()
