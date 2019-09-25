@@ -423,7 +423,7 @@ install_es()
 
     log "[install_es] installing Elasticsearch $ES_VERSION"
 
-    copy elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
+    cp elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo
 
     yum install -q -y elasticsearch
 
