@@ -1276,7 +1276,8 @@ port_forward()
 
     #install iptables-persistent to restore configuration after reboot
     log "[port_forward] installing iptables-persistent"
-    (apt-get -yq install iptables-persistent || (sleep 15; apt-get -yq install iptables-persistent))
+    #(apt-get -yq install iptables-persistent || (sleep 15; apt-get -yq install iptables-persistent))
+    (sudo yum -yq install iptables-persistent || (sleep 15; sudo yum -yq install iptables-persistent))
 
     # persist iptables changes
     service netfilter-persistent save
