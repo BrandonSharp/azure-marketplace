@@ -363,11 +363,11 @@ create_striped_volume()
 
 check_mdadm() {
   log "installing or updating mdadm"
-  (apt-get -y update || (sleep 15; apt-get -y update)) > /dev/null
-  log "apt-get updated installing mdadm now"
-  (apt-get -yq install mdadm || (sleep 15; apt-get -yq install mdadm))
+  (yum -y update || (sleep 15; yum -y update)) > /dev/null
+  log "yum updated installing mdadm now"
+  (yum -yq install mdadm || (sleep 15; yum -yq install mdadm))
   dpkg -s mdadm >/dev/null 2>&1
-  log "apt-get installed mdadm and can be found returns: ${?}"
+  log "yum installed mdadm and can be found returns: ${?}"
 }
 
 # Create Partitions

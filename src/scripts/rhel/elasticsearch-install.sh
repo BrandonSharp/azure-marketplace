@@ -269,14 +269,14 @@ done
 #########################
 
 # supports security features with a basic license
-if [[ $(dpkg --compare-versions "$ES_VERSION" "ge" "7.1.0"; echo $?) -eq 0 || ($(dpkg --compare-versions "$ES_VERSION" "ge" "6.8.0"; echo $?) -eq 0 && $(dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; echo $?) -eq 0) ]]; then
+# if [[ $(dpkg --compare-versions "$ES_VERSION" "ge" "7.1.0"; echo $?) -eq 0 || ($(dpkg --compare-versions "$ES_VERSION" "ge" "6.8.0"; echo $?) -eq 0 && $(dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; echo $?) -eq 0) ]]; then
   BASIC_SECURITY=1
-fi
+# fi
 
 # zen2 should emit the ports from hosts
-if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
+# if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
   UNICAST_HOST_PORT=""
-fi
+# fi
 
 if [ ${CLUSTER_USES_DEDICATED_MASTERS} -ne 0 ]; then
     MINIMUM_MASTER_NODES=2
@@ -290,10 +290,10 @@ else
     UNICAST_HOSTS="${UNICAST_HOSTS%?}]"
 fi
 
-if [[ $(dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; echo $?) -eq 0 && (${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0) ]]; then
+# if [[ $(dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; echo $?) -eq 0 && (${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0) ]]; then
     log "using bootstrap password as the seed password"
     SEED_PASSWORD="$BOOTSTRAP_PASSWORD"
-fi
+# fi
 
 log "bootstrapping an Elasticsearch $ES_VERSION cluster named '$CLUSTER_NAME' with minimum_master_nodes set to $MINIMUM_MASTER_NODES"
 log "cluster uses dedicated master nodes is set to $CLUSTER_USES_DEDICATED_MASTERS and unicast goes to $UNICAST_HOSTS"
