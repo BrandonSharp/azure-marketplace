@@ -442,13 +442,13 @@ plugin_cmd()
 
 install_xpack()
 {
-    if dpkg --compare-versions "$ES_VERSION" "lt" "6.3.0"; then
-      log "[install_xpack] installing X-Pack plugins"
-      $(plugin_cmd) install x-pack --batch
-      log "[install_xpack] installed X-Pack plugins"
-    else
+    # if dpkg --compare-versions "$ES_VERSION" "lt" "6.3.0"; then
+    #   log "[install_xpack] installing X-Pack plugins"
+    #   $(plugin_cmd) install x-pack --batch
+    #   log "[install_xpack] installed X-Pack plugins"
+    # else
       log "[install_xpack] X-Pack bundled by default. Skip installing"
-    fi
+    # fi
 }
 
 install_repository_azure_plugin()
@@ -573,11 +573,11 @@ apply_security_settings()
       log "[apply_security_settings] start updating roles and users"
 
       local XPACK_SECURITY_PATH
-      if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
+      # if dpkg --compare-versions "$ES_VERSION" "ge" "7.0.0"; then
         XPACK_SECURITY_PATH="_security"
-      else
-        XPACK_SECURITY_PATH="_xpack/security"
-      fi
+      # else
+      #   XPACK_SECURITY_PATH="_xpack/security"
+      # fi
 
       local XPACK_USER_ENDPOINT="$PROTOCOL://localhost:9200/$XPACK_SECURITY_PATH/user"
       local XPACK_ROLE_ENDPOINT="$PROTOCOL://localhost:9200/$XPACK_SECURITY_PATH/role"
@@ -614,7 +614,7 @@ apply_security_settings()
       log "[apply_security_settings] updated built-in logstash_system user password"
 
       #update builtin `beats_system` account for Elasticsearch 6.3.0+
-      if dpkg --compare-versions "$ES_VERSION" "ge" "6.3.0"; then
+      # if dpkg --compare-versions "$ES_VERSION" "ge" "6.3.0"; then
         local BEATS_JSON=$(printf '{"password":"%s"}\n' $USER_BEATS_PWD)
         echo $BEATS_JSON | curl_ignore_409 -XPUT -u "elastic:$USER_ADMIN_PWD" "$XPACK_USER_ENDPOINT/beats_system/_password" -d @-
         if [[ $? != 0 ]];  then
@@ -622,10 +622,10 @@ apply_security_settings()
           exit 10
         fi
         log "[apply_security_settings] updated built-in beats_system user password"
-      fi
+      # fi
 
       
-      if dpkg --compare-versions "$ES_VERSION" "ge" "6.5.0"; then
+      # if dpkg --compare-versions "$ES_VERSION" "ge" "6.5.0"; then
         #update builtin `apm_system` account for Elasticsearch 6.5.0+
         local APM_JSON=$(printf '{"password":"%s"}\n' $USER_APM_PWD)
         echo $APM_JSON | curl_ignore_409 -XPUT -u "elastic:$USER_ADMIN_PWD" "$XPACK_USER_ENDPOINT/apm_system/_password" -d @-
@@ -643,7 +643,7 @@ apply_security_settings()
           exit 10
         fi
         log "[apply_security_settings] updated built-in remote_monitoring_user user password"     
-      fi   
+      # fi   
     fi
 }
 
@@ -761,7 +761,7 @@ configure_http_tls()
     log "[configure_http_tls] configuring SSL/TLS for HTTP layer"
     echo "xpack.security.http.ssl.enabled: true" >> $ES_CONF
 
-    if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
+    # if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
       if [[ -f $HTTP_CERT_PATH ]]; then
           # dealing with PKCS#12 archive
           echo "xpack.security.http.ssl.keystore.path: $HTTP_CERT_PATH" >> $ES_CONF
@@ -786,38 +786,38 @@ configure_http_tls()
               echo "$HTTP_CERT_PASSWORD" | $KEY_STORE add xpack.security.http.ssl.secure_key_passphrase -xf
           fi
       fi
-    else
-      # Elasticsearch 5.x does not support PKCS#12 archives, so any passed or generated certs will need to be converted to PEM
-      if [[ -f $HTTP_CERT_PATH ]]; then
-          log "[configure_http_tls] convert PKCS#12 HTTP to PEM"
-          echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http.crt -nokeys -passin stdin
-          echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http.key -nocerts -nodes -passin stdin
-          echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http-ca.crt -cacerts -nokeys -chain -passin stdin
-      fi
+    # else
+    #   # Elasticsearch 5.x does not support PKCS#12 archives, so any passed or generated certs will need to be converted to PEM
+    #   if [[ -f $HTTP_CERT_PATH ]]; then
+    #       log "[configure_http_tls] convert PKCS#12 HTTP to PEM"
+    #       echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http.crt -nokeys -passin stdin
+    #       echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http.key -nocerts -nodes -passin stdin
+    #       echo "$HTTP_CERT_PASSWORD" | openssl pkcs12 -in $HTTP_CERT_PATH -out $SSL_PATH/elasticsearch-http-ca.crt -cacerts -nokeys -chain -passin stdin
+    #   fi
 
-      echo "xpack.security.http.ssl.certificate: $SSL_PATH/elasticsearch-http.crt" >> $ES_CONF
-      echo "xpack.security.http.ssl.key: $SSL_PATH/elasticsearch-http.key" >> $ES_CONF
+    #   echo "xpack.security.http.ssl.certificate: $SSL_PATH/elasticsearch-http.crt" >> $ES_CONF
+    #   echo "xpack.security.http.ssl.key: $SSL_PATH/elasticsearch-http.key" >> $ES_CONF
 
-      if [[ $(stat -c %s $SSL_PATH/elasticsearch-http-ca.crt 2>/dev/null) -ne 0 ]]; then
-          echo "xpack.security.http.ssl.certificate_authorities: [ $SSL_PATH/elasticsearch-http-ca.crt ]" >> $ES_CONF
-      fi
+    #   if [[ $(stat -c %s $SSL_PATH/elasticsearch-http-ca.crt 2>/dev/null) -ne 0 ]]; then
+    #       echo "xpack.security.http.ssl.certificate_authorities: [ $SSL_PATH/elasticsearch-http-ca.crt ]" >> $ES_CONF
+    #   fi
 
-      if [[ -n "$HTTP_CERT_PASSWORD" ]]; then
-          # Encrypt the private key if there's a password
-          log "[configure_http_tls] encrypt HTTP private key"
-          echo "$HTTP_CERT_PASSWORD" | openssl rsa -aes256 -in $SSL_PATH/elasticsearch-http.key -out $SSL_PATH/elasticsearch-http-encrypted.key -passout stdin
-          mv $SSL_PATH/elasticsearch-http-encrypted.key $SSL_PATH/elasticsearch-http.key
+    #   if [[ -n "$HTTP_CERT_PASSWORD" ]]; then
+    #       # Encrypt the private key if there's a password
+    #       log "[configure_http_tls] encrypt HTTP private key"
+    #       echo "$HTTP_CERT_PASSWORD" | openssl rsa -aes256 -in $SSL_PATH/elasticsearch-http.key -out $SSL_PATH/elasticsearch-http-encrypted.key -passout stdin
+    #       mv $SSL_PATH/elasticsearch-http-encrypted.key $SSL_PATH/elasticsearch-http.key
 
-          if dpkg --compare-versions "$ES_VERSION" "ge" "5.6.0"; then
-            log "[configure_http_tls] configure HTTP key password in keystore"
-            create_keystore_if_not_exists
-            echo "$HTTP_CERT_PASSWORD" | $KEY_STORE add xpack.security.http.ssl.secure_key_passphrase -xf
-          else
-            log "[configure_http_tls] configure HTTP key password in config"
-            echo "xpack.security.http.ssl.key_passphrase: \"$HTTP_CERT_PASSWORD\"" >> $ES_CONF
-          fi
-      fi
-    fi
+    #       if dpkg --compare-versions "$ES_VERSION" "ge" "5.6.0"; then
+    #         log "[configure_http_tls] configure HTTP key password in keystore"
+    #         create_keystore_if_not_exists
+    #         echo "$HTTP_CERT_PASSWORD" | $KEY_STORE add xpack.security.http.ssl.secure_key_passphrase -xf
+    #       else
+    #         log "[configure_http_tls] configure HTTP key password in config"
+    #         echo "xpack.security.http.ssl.key_passphrase: \"$HTTP_CERT_PASSWORD\"" >> $ES_CONF
+    #       fi
+    #   fi
+    # fi
 
     chown -R elasticsearch:elasticsearch $SSL_PATH
     # use HTTPS for calls to localhost when TLS configured on HTTP layer
@@ -914,7 +914,7 @@ configure_transport_tls()
     log "[configure_transport_tls] configuring SSL/TLS for Transport layer"
     echo "xpack.security.transport.ssl.enabled: true" >> $ES_CONF
 
-    if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
+    # if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
       if [[ -f $TRANSPORT_CERT_PATH ]]; then
           echo "xpack.security.transport.ssl.keystore.path: $TRANSPORT_CERT_PATH" >> $ES_CONF
           echo "xpack.security.transport.ssl.truststore.path: $TRANSPORT_CERT_PATH" >> $ES_CONF
@@ -935,28 +935,28 @@ configure_transport_tls()
               echo "$TRANSPORT_CERT_PASSWORD" | $KEY_STORE add xpack.security.transport.ssl.secure_key_passphrase -xf
           fi
       fi
-    else
-      if [[ -f $TRANSPORT_CERT_PATH ]]; then
-          log "[configure_transport_tls] converting PKCS#12 Transport archive to PEM"
-          echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport.crt -clcerts -nokeys -passin stdin
-          echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport.key -nocerts -nodes -passin stdin
-          echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport-ca.crt -cacerts -nokeys -chain -passin stdin
-      fi
+    # else
+    #   if [[ -f $TRANSPORT_CERT_PATH ]]; then
+    #       log "[configure_transport_tls] converting PKCS#12 Transport archive to PEM"
+    #       echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport.crt -clcerts -nokeys -passin stdin
+    #       echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport.key -nocerts -nodes -passin stdin
+    #       echo "$TRANSPORT_CERT_PASSWORD" | openssl pkcs12 -in $TRANSPORT_CERT_PATH -out $SSL_PATH/elasticsearch-transport-ca.crt -cacerts -nokeys -chain -passin stdin
+    #   fi
 
-      echo "xpack.security.transport.ssl.certificate: $SSL_PATH/elasticsearch-transport.crt" >> $ES_CONF
-      echo "xpack.security.transport.ssl.key: $SSL_PATH/elasticsearch-transport.key" >> $ES_CONF
-      echo "xpack.security.transport.ssl.certificate_authorities: [ $SSL_PATH/elasticsearch-transport-ca.crt ]" >> $ES_CONF
-      if [[ -n "$TRANSPORT_CERT_PASSWORD" ]]; then
-          if dpkg --compare-versions "$ES_VERSION" "ge" "5.6.0"; then
-              log "[configure_transport_tls] configure Transport key password in keystore"
-              create_keystore_if_not_exists
-              echo "$TRANSPORT_CERT_PASSWORD" | $KEY_STORE add xpack.security.transport.ssl.secure_key_passphrase -xf
-          else
-              log "[configure_transport_tls] configure Transport key password in config"
-              echo "xpack.security.transport.ssl.key_passphrase: \"$TRANSPORT_CERT_PASSWORD\"" >> $ES_CONF
-          fi
-      fi
-    fi
+    #   echo "xpack.security.transport.ssl.certificate: $SSL_PATH/elasticsearch-transport.crt" >> $ES_CONF
+    #   echo "xpack.security.transport.ssl.key: $SSL_PATH/elasticsearch-transport.key" >> $ES_CONF
+    #   echo "xpack.security.transport.ssl.certificate_authorities: [ $SSL_PATH/elasticsearch-transport-ca.crt ]" >> $ES_CONF
+    #   if [[ -n "$TRANSPORT_CERT_PASSWORD" ]]; then
+    #       if dpkg --compare-versions "$ES_VERSION" "ge" "5.6.0"; then
+    #           log "[configure_transport_tls] configure Transport key password in keystore"
+    #           create_keystore_if_not_exists
+    #           echo "$TRANSPORT_CERT_PASSWORD" | $KEY_STORE add xpack.security.transport.ssl.secure_key_passphrase -xf
+    #       else
+    #           log "[configure_transport_tls] configure Transport key password in config"
+    #           echo "xpack.security.transport.ssl.key_passphrase: \"$TRANSPORT_CERT_PASSWORD\"" >> $ES_CONF
+    #       fi
+    #   fi
+    # fi
 
     chown -R elasticsearch:elasticsearch $SSL_PATH
     log "[configure_transport_tls] configured SSL/TLS for Transport layer"
@@ -1008,15 +1008,15 @@ configure_elasticsearch_yaml()
     echo "path.data: $DATAPATH_CONFIG" >> $ES_CONF
 
     # Configure discovery
-    if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
-      log "[configure_elasticsearch_yaml] update configuration with discovery.zen.ping.unicast.hosts set to $UNICAST_HOSTS"
-      echo "discovery.zen.ping.unicast.hosts: $UNICAST_HOSTS" >> $ES_CONF
-      echo "discovery.zen.minimum_master_nodes: $MINIMUM_MASTER_NODES" >> $ES_CONF
-    else
+    # if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
+    #   log "[configure_elasticsearch_yaml] update configuration with discovery.zen.ping.unicast.hosts set to $UNICAST_HOSTS"
+    #   echo "discovery.zen.ping.unicast.hosts: $UNICAST_HOSTS" >> $ES_CONF
+    #   echo "discovery.zen.minimum_master_nodes: $MINIMUM_MASTER_NODES" >> $ES_CONF
+    # else
       log "[configure_elasticsearch_yaml] update configuration with discovery.seed_hosts and cluster.initial_master_nodes set to $UNICAST_HOSTS"
       echo "discovery.seed_hosts: $UNICAST_HOSTS" >> $ES_CONF
       echo "cluster.initial_master_nodes: $UNICAST_HOSTS" >> $ES_CONF
-    fi
+    # fi
 
     # Configure Elasticsearch node type
     log "[configure_elasticsearch_yaml] configure master/client/data node type flags only master-$MASTER_ONLY_NODE only data-$DATA_ONLY_NODE"
@@ -1051,20 +1051,20 @@ configure_elasticsearch_yaml()
 
     # Configure Azure Cloud plugin
     if [[ -n "$STORAGE_ACCOUNT" && -n "$STORAGE_KEY" && -n "$STORAGE_SUFFIX" ]]; then
-      if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
+      # if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
         log "[configure_elasticsearch_yaml] configure storage for repository-azure plugin in keystore"
         create_keystore_if_not_exists
         echo "$STORAGE_ACCOUNT" | /usr/share/elasticsearch/bin/elasticsearch-keystore add azure.client.default.account -xf
         echo "$STORAGE_KEY" | /usr/share/elasticsearch/bin/elasticsearch-keystore add azure.client.default.key -xf
         echo "azure.client.default.endpoint_suffix: $STORAGE_SUFFIX" >> $ES_CONF
-      else
-        log "[configure_elasticsearch_yaml] configure storage for repository-azure plugin in $ES_CONF"
-        echo "cloud.azure.storage.default.account: ${STORAGE_ACCOUNT}" >> $ES_CONF
-        echo "cloud.azure.storage.default.key: ${STORAGE_KEY}" >> $ES_CONF
-      fi
+      # else
+      #   log "[configure_elasticsearch_yaml] configure storage for repository-azure plugin in $ES_CONF"
+      #   echo "cloud.azure.storage.default.account: ${STORAGE_ACCOUNT}" >> $ES_CONF
+      #   echo "cloud.azure.storage.default.key: ${STORAGE_KEY}" >> $ES_CONF
+      # fi
     fi
 
-    if [[ ${INSTALL_XPACK} -ne 0 && $(dpkg --compare-versions "$ES_VERSION" "ge" "6.3.0"; echo $?) -eq 0 ]]; then
+    if [[ ${INSTALL_XPACK} -ne 0 ]]; then
       log "[configure_elasticsearch_yaml] Set generated license type to trial"
       echo "xpack.license.self_generated.type: trial" >> $ES_CONF
     fi
@@ -1323,21 +1323,21 @@ install_es
 
 setup_data_disk
 
-# if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
-#     install_xpack
-#     # in 6.x + we need to set up the bootstrap.password in the keystore to use when setting up users
-#     if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
-#         setup_bootstrap_password
-#     fi
-# fi
+if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
+    install_xpack
+    # in 6.x + we need to set up the bootstrap.password in the keystore to use when setting up users
+    # if dpkg --compare-versions "$ES_VERSION" "ge" "6.0.0"; then
+        setup_bootstrap_password
+    # fi
+fi
 
-# if [[ ! -z "${INSTALL_ADDITIONAL_PLUGINS// }" ]]; then
-#     install_additional_plugins
-# fi
+if [[ ! -z "${INSTALL_ADDITIONAL_PLUGINS// }" ]]; then
+    install_additional_plugins
+fi
 
-# if [ ${INSTALL_AZURECLOUD_PLUGIN} -ne 0 ]; then
-#     install_repository_azure_plugin
-# fi
+if [ ${INSTALL_AZURECLOUD_PLUGIN} -ne 0 ]; then
+    install_repository_azure_plugin
+fi
 
 
 configure_elasticsearch_yaml
@@ -1351,10 +1351,10 @@ port_forward
 start_systemd
 
 # patch roles and users through the REST API which is a tad trickier
-# if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
-#   wait_for_started
-#   apply_security_settings
-# fi
+if [[ ${INSTALL_XPACK} -ne 0 || ${BASIC_SECURITY} -ne 0 ]]; then
+  wait_for_started
+  apply_security_settings
+fi
 
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
 PRETTY=$(printf '%dh:%dm:%ds\n' $(($ELAPSED_TIME/3600)) $(($ELAPSED_TIME%3600/60)) $(($ELAPSED_TIME%60)))
