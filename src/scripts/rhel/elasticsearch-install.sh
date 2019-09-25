@@ -1133,17 +1133,17 @@ configure_elasticsearch_yaml()
     fi
 
     # Configure SAML realm only for valid versions of Elasticsearch and if the conditions are met
-    if [[ $(dpkg --compare-versions "$ES_VERSION" "ge" "6.2.0"; echo $?) -eq 0 && -n "$SAML_METADATA_URI" && -n "$SAML_SP_URI" && ( -n "$HTTP_CERT" || -n "$HTTP_CACERT" ) && ${INSTALL_XPACK} -ne 0 ]]; then     
+    if [[ -n "$SAML_METADATA_URI" && -n "$SAML_SP_URI" && ( -n "$HTTP_CERT" || -n "$HTTP_CACERT" ) && ${INSTALL_XPACK} -ne 0 ]]; then     
       log "[configure_elasticsearch_yaml] configuring native realm name 'native1' as SAML realm will be configured"     
       {
           echo -e ""
           # include the realm type in the setting name in 7.x +
-          if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
-            echo -e "xpack.security.authc.realms.native1:"
-            echo -e "  type: native"
-          else
+          # if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
+          #   echo -e "xpack.security.authc.realms.native1:"
+          #   echo -e "  type: native"
+          # else
             echo -e "xpack.security.authc.realms.native.native1:"
-          fi
+          # fi
           echo -e "  order: 0"
           echo -e ""
       } >> $ES_CONF
@@ -1158,12 +1158,12 @@ configure_elasticsearch_yaml()
       {
           echo -e ""
           # include the realm type in the setting name in 7.x +
-          if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
-            echo -e "xpack.security.authc.realms.saml_aad:"
-            echo -e "  type: saml"
-          else
+          # if dpkg --compare-versions "$ES_VERSION" "lt" "7.0.0"; then
+          #   echo -e "xpack.security.authc.realms.saml_aad:"
+          #   echo -e "  type: saml"
+          # else
             echo -e "xpack.security.authc.realms.saml.saml_aad:"
-          fi
+          # fi
           echo -e "  order: 2"
           echo -e "  idp.metadata.path: /etc/elasticsearch/saml/metadata.xml"
           echo -e "  idp.entity_id: \"$IDP_ENTITY_ID\""

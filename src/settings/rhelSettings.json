@@ -125,7 +125,8 @@
           "typeHandlerVersion": "2.0",
           "autoUpgradeMinorVersion": true,
           "settings": {
-            "fileUris": "[variables('rhelScripts')]"
+            "fileUris": "[variables('rhelScripts')]",
+            "timestamp": 1
           },
           "protectedSettings": {
             "commandToExecute": "[concat('bash elasticsearch-install.sh -x', variables('commonShortOpts'), variables('commonInstallParams'))]"
@@ -149,7 +150,8 @@
           "typeHandlerVersion": "2.0",
           "autoUpgradeMinorVersion": true,
           "settings": {
-            "fileUris": "[variables('rhelScripts')]"
+            "fileUris": "[variables('rhelScripts')]",
+            "timestamp": 1
           },
           "protectedSettings": {
             "commandToExecute": "[concat('bash elasticsearch-install.sh -', variables('dataNodeShortOpt'), variables('commonShortOpts'), variables('commonInstallParams'))]"

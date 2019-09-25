@@ -142,9 +142,9 @@ done
 #########################
 
 # supports security features with a basic license
-if [[ $(dpkg --compare-versions "$KIBANA_VERSION" "ge" "7.1.0"; echo $?) -eq 0 || ($(dpkg --compare-versions "$KIBANA_VERSION" "ge" "6.8.0"; echo $?) -eq 0 && $(dpkg --compare-versions "$KIBANA_VERSION" "lt" "7.0.0"; echo $?) -eq 0) ]]; then
+# if [[ $(dpkg --compare-versions "$KIBANA_VERSION" "ge" "7.1.0"; echo $?) -eq 0 || ($(dpkg --compare-versions "$KIBANA_VERSION" "ge" "6.8.0"; echo $?) -eq 0 && $(dpkg --compare-versions "$KIBANA_VERSION" "lt" "7.0.0"; echo $?) -eq 0) ]]; then
   BASIC_SECURITY=1
-fi
+# fi
 
 log "installing Kibana $KIBANA_VERSION for Elasticsearch cluster: $CLUSTER_NAME"
 log "installing X-Pack plugins is set to: $INSTALL_XPACK"
