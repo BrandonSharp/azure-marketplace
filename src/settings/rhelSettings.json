@@ -151,7 +151,7 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": "[variables('rhelScripts')]",
-            "timestamp": 1
+            "timestamp": 2
           },
           "protectedSettings": {
             "commandToExecute": "[concat('bash elasticsearch-install.sh -', variables('dataNodeShortOpt'), variables('commonShortOpts'), variables('commonInstallParams'))]"
