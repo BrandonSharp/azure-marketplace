@@ -459,9 +459,6 @@ if systemctl -q is-active kibana.service; then
   exit 0
 fi
 
-## NOTE: For testing only; don't install Kibana (yet)
-exit 0 
-
 log "[yum] updating yum"
 (yum -y update || (sleep 15; yum -y update))
 $EXIT_CODE=$?
