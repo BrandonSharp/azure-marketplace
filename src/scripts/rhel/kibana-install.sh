@@ -449,6 +449,9 @@ if systemctl -q is-active kibana.service; then
   exit 0
 fi
 
+## NOTE: For testing only; don't install Kibana (yet)
+exit 0 
+
 log "[apt-get] updating apt-get"
 (apt-get -y update || (sleep 15; apt-get -y update))
 $EXIT_CODE=$?
