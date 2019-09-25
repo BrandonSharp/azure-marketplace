@@ -158,44 +158,53 @@ log "Kibana will talk to Elasticsearch over $ELASTICSEARCH_URL"
 
 install_kibana()
 {
-    local PACKAGE="kibana-$KIBANA_VERSION-amd64.deb"
-    local ALGORITHM="512"
-    if dpkg --compare-versions "$KIBANA_VERSION" "lt" "5.6.2"; then
-      ALGORITHM="1"
-    fi
+    # local PACKAGE="kibana-$KIBANA_VERSION-amd64.deb"
+    # local ALGORITHM="512"
+    # if dpkg --compare-versions "$KIBANA_VERSION" "lt" "5.6.2"; then
+    #   ALGORITHM="1"
+    # fi
 
-    local SHASUM="$PACKAGE.sha$ALGORITHM"
-    local DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/$PACKAGE?ultron=msft&gambit=azure"
-    local SHASUM_URL="https://artifacts.elastic.co/downloads/kibana/$SHASUM?ultron=msft&gambit=azure"
+    # local SHASUM="$PACKAGE.sha$ALGORITHM"
+    # local DOWNLOAD_URL="https://artifacts.elastic.co/downloads/kibana/$PACKAGE?ultron=msft&gambit=azure"
+    # local SHASUM_URL="https://artifacts.elastic.co/downloads/kibana/$SHASUM?ultron=msft&gambit=azure"
+
+    # log "[install_kibana] download Kibana $KIBANA_VERSION"
+    # wget --retry-connrefused --waitretry=1 -q "$SHASUM_URL" -O $SHASUM
+    # local EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_kibana] error downloading Kibana $KIBANA_VERSION sha$ALGORITHM checksum"
+    #     exit $EXIT_CODE
+    # fi
+    # log "[install_kibana] download location $DOWNLOAD_URL"
+    # wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
+    # EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_kibana] error downloading Kibana $KIBANA_VERSION"
+    #     exit $EXIT_CODE
+    # fi
+    # log "[install_kibana] downloaded Kibana $KIBANA_VERSION"
+
+    # # earlier sha files do not contain the package name. add it
+    # grep -q "$PACKAGE" $SHASUM || sed -i "s/.*/&  $PACKAGE/" $SHASUM
+
+    # shasum -a $ALGORITHM -c $SHASUM
+    # EXIT_CODE=$?
+    # if [ $EXIT_CODE -ne 0 ]; then
+    #     log "[install_kibana] error validating checksum for Kibana $KIBANA_VERSION"
+    #     exit $EXIT_CODE
+    # fi
+
+    # log "[install_kibana] installing Kibana $KIBANA_VERSION"
+    # dpkg -i $PACKAGE
+    # log "[install_kibana] installed Kibana $KIBANA_VERSION"
 
     log "[install_kibana] download Kibana $KIBANA_VERSION"
-    wget --retry-connrefused --waitretry=1 -q "$SHASUM_URL" -O $SHASUM
-    local EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_kibana] error downloading Kibana $KIBANA_VERSION sha$ALGORITHM checksum"
-        exit $EXIT_CODE
-    fi
-    log "[install_kibana] download location $DOWNLOAD_URL"
-    wget --retry-connrefused --waitretry=1 -q "$DOWNLOAD_URL" -O $PACKAGE
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_kibana] error downloading Kibana $KIBANA_VERSION"
-        exit $EXIT_CODE
-    fi
-    log "[install_kibana] downloaded Kibana $KIBANA_VERSION"
 
-    # earlier sha files do not contain the package name. add it
-    grep -q "$PACKAGE" $SHASUM || sed -i "s/.*/&  $PACKAGE/" $SHASUM
+    sudo cp kibana.repo /etc/yum.repos.d/kibana.repo
+    sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
-    shasum -a $ALGORITHM -c $SHASUM
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        log "[install_kibana] error validating checksum for Kibana $KIBANA_VERSION"
-        exit $EXIT_CODE
-    fi
+    sudo yum install -q -y kibana
 
-    log "[install_kibana] installing Kibana $KIBANA_VERSION"
-    dpkg -i $PACKAGE
     log "[install_kibana] installed Kibana $KIBANA_VERSION"
 }
 
@@ -453,14 +462,14 @@ fi
 ## NOTE: For testing only; don't install Kibana (yet)
 exit 0 
 
-log "[apt-get] updating apt-get"
-(apt-get -y update || (sleep 15; apt-get -y update))
+log "[yum] updating yum"
+(yum -y update || (sleep 15; yum -y update))
 $EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
-  log "[apt-get] failed updating apt-get. exit code: $EXIT_CODE"
+  log "[yum] failed updating yum. exit code: $EXIT_CODE"
   exit $EXIT_CODE
 fi
-log "[apt-get] updated apt-get"
+log "[yum] updated yum"
 
 install_kibana
 

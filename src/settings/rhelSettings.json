@@ -107,7 +107,8 @@
       "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/logstash-install.sh', parameters('_artifactsLocationSasToken')))]",
       "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/vm-disk-utils-0.1.sh', parameters('_artifactsLocationSasToken')))]",
       "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/java-install.sh', parameters('_artifactsLocationSasToken')))]",
-      "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/elasticsearch.repo', parameters('_artifactsLocationSasToken')))]"
+      "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/elasticsearch.repo', parameters('_artifactsLocationSasToken')))]",
+      "[uri(parameters('_artifactsLocation'), concat('scripts/rhel/kibana.repo', parameters('_artifactsLocationSasToken')))]"
     ],
     "rhelSettings": {
       "imageReference": {
